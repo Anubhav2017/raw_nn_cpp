@@ -284,7 +284,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
 }
 
 
-void forward_relu(float* x, float* y, int dim){
+void forward_relu(vector<float> x, vector<float> y, int dim){
 
     float xbuf[dim];
     float ybuf[dim];
@@ -305,7 +305,7 @@ void forward_relu(float* x, float* y, int dim){
     }
 }
 
-void backward_relu(float* x, float* dx, float* dy, int dim){
+void backward_relu(vector<float> x, vector<float> dx, vector<float> dy, int dim){
 
     float xbuf[dim];
     float dxbuf[dim];
@@ -327,6 +327,37 @@ void backward_relu(float* x, float* dx, float* dy, int dim){
         dx[i] = dxbuf[i];
     }
 
+}
+
+void softmax_loss(vector<vector<float>> x, vector<int> y){
+    
+    float log_probs[x[0].size()];
+    float ybuf[x[0].size()];
+    float probs[x[0].size()];
+
+    for (int n = 0; n < x.size(); n++) {
+
+        float max = x[n][0];
+        for(int i=1;i<x[n].size();i++){
+            if(x[n][i] > max){
+                max = x[n][i];
+            }
+        }
+    
+        for(int i=0;i<x[n].size();i++){
+            log_probs[i] = x[n][i] - max;
+        }
+    
+        float sum = 0;
+        for(int i=0;i<x[n].size();i++){
+            sum += exp(log_probs[i]);
+        }
+    
+        for(int i=0;i<x.size();i++){
+            probs[i] = exp(log_probs[i])/sum;
+        }
+    }  
+    
 }
 
 
