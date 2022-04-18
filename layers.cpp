@@ -125,14 +125,9 @@ void backward_fcc(vector<float> &x, vector<float> &w, vector<float> &dx, vector<
     for(int i=0;i<ydim;i++){
         for(int j=0;j<xdim;j++){
             dxbuf[j] = dybuf[i] * wbuf[i][j];
-        }
-        
-    }
-    //compute gradient of weights
-    for(int i=0;i<ydim;i++){
-        for(int j=0;j<xdim;j++){
             dwbuf[i][j] += dybuf[i]*xbuf[j];
         }
+        
     }
 
     //compute gradient of biases
@@ -160,15 +155,7 @@ void backward_fcc(vector<float> &x, vector<float> &w, vector<float> &dx, vector<
         }
     }
     
-    // for(int i=0;i<ydim;i++){
-    //     for(int j=0;j<xdim;j++){
-            
-    //         w[i][j]-=lr*dw[i][j];
-            
-    //     }
-        
-    //     b[i] -= lr*db[i];
-    // }
+
 }
 
 
@@ -226,27 +213,121 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
     float dwbuf[F][C][FH][FW];
     float dbbuf[F];
 
-    
 
-    
-
-    for(int f=0;f<F;f++){
-        for(int c=0;c<C;c++){
-            for(int h=0;h<outH;h++){
-                for(int w=0;w<outW;w++){
-                    ybuf[f][h][w]=bbuf[f];        
-                    for(int fh=0;fh<FH;fh++){
-                        for(int fw=0;fw<FW;fw++){
-                            ybuf[f][h][w] += xbuf[c][h+fh][w+fw]*wbuf[f][c][fh][fw];
-                        }
-                    }
+    for(int i=0;i<F;i++){
+        for(int j=0;j<C;j++){
+            for(int k=0;k<FH;k++){
+                for(int l=0;l<FW;l++){
+                    dwbuf[i][j][k][l] = dw[i*C*FH*FW+j*FH*FW+k*FW+l];
                 }
             }
         }
     }
 
-}
-// void flatten_forward(vectors)
+    for(int i=0;i<C;i++){
+        for(int j=0;j<H;j++){
+            for(int k=0;k<W;k++){
+                dxbuf[i][j][k] = dx[i*H*W+j*W+k];
+            }
+        }
+        
+    }
+
+    for(int i=0;i<ydim;i++){
+        db[i] = dbbuf[i];
+    }
+
+    // compute gradients
+
+    for(int f=0;f<F;f++){  
+        for(int h=0;h<outH;h++){
+            for(int w=0;w<outW;w++){      
+                for(int c=0;c<C;c++){
+                    for(int fh=0;fh<FH;fh++){
+                        for(int fw=0;fw<FW;fw++){
+                            dwbuf[f][c][fh][fw] += dybuf[f][h][w]*xbuf[c][h+fh][w+fw];
+                            dxbuf[c][h+fh][w+fw] += dybuf[f][h][w]*wbuf[f][c][h+fh][w+fw];
+                        }
+                    }
+                }
+                dbbuf[f] += dybuf[f][h][w];    
+            }
+        }
+    }
+
+    //write back stage
+
+    for(int i=0;i<F;i++){
+        for(int j=0;j<C;j++){
+            for(int k=0;k<FH;k++){
+                for(int l=0;l<FW;l++){
+                    dw[i*C*FH*FW+j*FH*FW+k*FW+l] = dwbuf[i][j][k][l];
+                }
+            }
+        }
+    }
+
+    for(int i=0;i<C;i++){
+        for(int j=0;j<H;j++){
+            for(int k=0;k<W;k++){
+                dx[i*H*W+j*W+k] = dxbuf[i][j][k];
+            }
+        }
+        
+    }
+
+    for(int i=0;i<ydim;i++){
+        db[i] = dbbuf[i];
+    }
     
 
-// }
+}
+
+
+void forward_relu(float* x, float* y, int dim){
+
+    float xbuf[dim];
+    float ybuf[dim];
+
+
+    for(int i=0;i<dim;i++){
+        xbuf[i] = x[i];
+        if xbuf[i] > 0{
+            ybuf[i] = xbuf[i];
+        }
+        else{
+            ybuf[i] = 0;
+        }
+    }
+
+    for(int i=0;i<dim;i++){
+        y[i] = ybuf[i];
+    }
+}
+
+void backward_relu(float* x, float* dx, float* dy, int dim){
+
+    float xbuf[dim];
+    float dxbuf[dim];
+    float dybuf[dim];
+
+    for(int i=0;i<dim;i++){
+        xbuf[i] = x[i];
+        dybuf[i] = dy[i];
+
+        if xbuf[i] > 0{
+            dxbuf[i] = dybuf[i];
+        }
+        else{
+            dxbuf[i] = 0;
+        }
+    }
+
+    for(int i=0;i<dim;i++){
+        dx[i] = dxbuf[i];
+    }
+
+}
+
+
+
