@@ -329,36 +329,56 @@ void backward_relu(vector<float> x, vector<float> dx, vector<float> dy, int dim)
 
 }
 
-void softmax_loss(vector<vector<float>> x, vector<int> y){
+float cross_entropy_derivative(vector<vector<float>> x,vector<vector<float>> &dx, int y,int N){
     
-    float log_probs[x[0].size()];
-    float ybuf[x[0].size()];
-    float probs[x[0].size()];
+    float log_probs[x.size()];
+    float ybuf[x.size()];
+    float probs[x.size()];
 
-    for (int n = 0; n < x.size(); n++) {
+    float loss =0;
 
-        float max = x[n][0];
-        for(int i=1;i<x[n].size();i++){
-            if(x[n][i] > max){
-                max = x[n][i];
+
+        float max = x[0];
+        for(int i=1;i<x.size();i++){
+            if(x[i] > max){
+                max = x[i];
             }
         }
     
-        for(int i=0;i<x[n].size();i++){
-            log_probs[i] = x[n][i] - max;
+        for(int i=0;i<x.size();i++){
+            log_probs[i] = x[i] - max;
         }
     
         float sum = 0;
-        for(int i=0;i<x[n].size();i++){
+
+        for(int i=0;i<x.size();i++){
             sum += exp(log_probs[i]);
         }
     
         for(int i=0;i<x.size();i++){
             probs[i] = exp(log_probs[i])/sum;
         }
-    }  
+
+        loss -= log(probs[y]);
+
+        
+
+        for(int i=0;i<x.size();i++){
+            if(i == y){
+                dx[i] = (probs[i] - 1)/N;
+            }
+            else{
+                dx[i] = probs[i]/N;
+            }
+        }
     
-}
+
+    loss=loss/x.size();
+
+    return loss;
+}  
+    
+
 
 
 
