@@ -1,4 +1,7 @@
-#include<vector>
+#include "layers.h"
+#include<cmath>
+
+using namespace std;
 
 void forward_fcc(vector<float> &x, vector<float> &w, vector<float> &y, vector<float> &b, int xdim, int ydim){
 
@@ -66,7 +69,7 @@ void forward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<f
         }
     }
 
-    for(int i=0;i<ydim;i++){
+    for(int i=0;i<F;i++){
         bbuf[i] = b[i];
     }
 
@@ -164,7 +167,6 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
     //populate cache
     float xbuf[C][H][W];
     float wbuf[F][C][FH][FW];
-    float bbuf[F];
 
     for(int i=0;i<C;i++){
         for(int j=0;j<H;j++){
@@ -186,16 +188,13 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         }
     }
 
-    for(int i=0;i<ydim;i++){
-        bbuf[i] = b[i];
-    }
 
     //dimensions of output
     int outH=H-FH+1;
     int outW=W-FW+1;
 
     //incoming gradient
-    float ybuf[F][outH][outW];
+//    float ybuf[F][outH][outW];
     float dybuf[F][outH][outW];
 
     for(int i=0;i<F;i++){
@@ -233,7 +232,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         
     }
 
-    for(int i=0;i<ydim;i++){
+    for(int i=0;i<F;i++){
         db[i] = dbbuf[i];
     }
 
@@ -276,7 +275,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         
     }
 
-    for(int i=0;i<ydim;i++){
+    for(int i=0;i<F;i++){
         db[i] = dbbuf[i];
     }
     
@@ -284,7 +283,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
 }
 
 
-void forward_relu(vector<float> x, vector<float> y, int dim){
+void forward_relu(vector<float> &x, vector<float> &y, int dim){
 
     float xbuf[dim];
     float ybuf[dim];
@@ -292,7 +291,7 @@ void forward_relu(vector<float> x, vector<float> y, int dim){
 
     for(int i=0;i<dim;i++){
         xbuf[i] = x[i];
-        if xbuf[i] > 0{
+        if (xbuf[i] > 0){
             ybuf[i] = xbuf[i];
         }
         else{
@@ -305,7 +304,7 @@ void forward_relu(vector<float> x, vector<float> y, int dim){
     }
 }
 
-void backward_relu(vector<float> x, vector<float> dx, vector<float> dy, int dim){
+void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int dim){
 
     float xbuf[dim];
     float dxbuf[dim];
@@ -315,7 +314,7 @@ void backward_relu(vector<float> x, vector<float> dx, vector<float> dy, int dim)
         xbuf[i] = x[i];
         dybuf[i] = dy[i];
 
-        if xbuf[i] > 0{
+        if (xbuf[i] > 0){
             dxbuf[i] = dybuf[i];
         }
         else{
@@ -329,48 +328,48 @@ void backward_relu(vector<float> x, vector<float> dx, vector<float> dy, int dim)
 
 }
 
-float cross_entropy_derivative(vector<vector<float>> x,vector<vector<float>> &dx, int y,int N){
+float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,int N){
     
     float log_probs[x.size()];
-    float ybuf[x.size()];
+//    float ybuf[x.size()];
     float probs[x.size()];
 
     float loss =0;
 
 
-        float max = x[0];
-        for(int i=1;i<x.size();i++){
-            if(x[i] > max){
-                max = x[i];
-            }
+    float max = x[0];
+    for(int i=1;i<x.size();i++){
+        if(x[i] > max){
+            max = x[i];
         }
+    }
+
+    for(int i=0;i<x.size();i++){
+        log_probs[i] = x[i] - max;
+    }
+
+    float sum = 0;
+
+    for(int i=0;i<x.size();i++){
+        sum += exp(log_probs[i]);
+    }
+
+    for(int i=0;i<x.size();i++){
+        probs[i] = exp(log_probs[i])/sum;
+    }
+
+    loss -= log(probs[y]);
+
     
-        for(int i=0;i<x.size();i++){
-            log_probs[i] = x[i] - max;
-        }
-    
-        float sum = 0;
 
-        for(int i=0;i<x.size();i++){
-            sum += exp(log_probs[i]);
+    for(int i=0;i<x.size();i++){
+        if(i == y){
+            dx[i] = (probs[i] - 1)/N;
         }
-    
-        for(int i=0;i<x.size();i++){
-            probs[i] = exp(log_probs[i])/sum;
+        else{
+            dx[i] = probs[i]/N;
         }
-
-        loss -= log(probs[y]);
-
-        
-
-        for(int i=0;i<x.size();i++){
-            if(i == y){
-                dx[i] = (probs[i] - 1)/N;
-            }
-            else{
-                dx[i] = probs[i]/N;
-            }
-        }
+    }
     
 
     loss=loss/x.size();

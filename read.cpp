@@ -1,7 +1,4 @@
-#include <iostream>
-#include <bits/stdc++.h>
-#include <fstream>
-#include <string>
+#include "read.h"
 
 using namespace std;
 
@@ -57,10 +54,11 @@ size_t split_int(const std::string &txt, std::vector<int> &strs, char ch)
     return strs.size();
 }
 
-void read_input(vector<vector<float>> &x_train, vector<int> &y_train){
+void read_input(vector< vector<float> > &x_train, vector<int> &y_train){
     fstream xfile;
     xfile.open("x_train.txt",ios::in); //open a file to perform read operation using file object
    if (xfile.is_open()){ //checking whether the file is open
+       cout << "inside file"<<'\n';
       string tp;
       int iter=0;
       while(getline(xfile, tp)){ //read data from file object and put it into string.
@@ -74,6 +72,7 @@ void read_input(vector<vector<float>> &x_train, vector<int> &y_train){
    fstream yfile;
     yfile.open("y_train.txt",ios::in); //open a file to perform read operation using file object
    if (yfile.is_open()){ //checking whether the file is open
+       cout << "inside file"<<'\n';
       string tp;
       while(getline(yfile, tp)){ //read data from file object and put it into string.
          const char* s = tp.c_str();
