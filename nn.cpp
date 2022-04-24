@@ -12,16 +12,16 @@ public:
     vector<string> layers;
     int nlayers=0;
 
-    vector<vector<float>> weights;
-    vector<vector<float>> grads_weights;
+    vector<vector<float> > weights;
+    vector<vector<float> > grads_weights;
 
-    vector<vector<float>> biases;
-    vector<vector<float>> grads_bias;
+    vector<vector<float> > biases;
+    vector<vector<float> > grads_bias;
 
-    vector<vector<float>> activations;
-    vector<vector<float>> grads_activations;
+    vector<vector<float> > activations;
+    vector<vector<float> > grads_activations;
 
-    vector<vector<int>> shapes;
+    vector<vector<int> > shapes;
     
 
     void add_fcc(int xdim, int ydim) {
