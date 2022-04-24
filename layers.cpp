@@ -1,5 +1,6 @@
 #include "layers.h"
 #include<cmath>
+#include <iostream>
 
 using namespace std;
 
@@ -40,6 +41,8 @@ void forward_fcc(vector<float> &x, vector<float> &w, vector<float> &y, vector<fl
 }
 
 void forward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<float> &b, int F, int C, int H, int W, int FH, int FW){
+    
+    
 
     float xbuf[C][H][W];
     float wbuf[F][C][FH][FW];
@@ -58,6 +61,27 @@ void forward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<f
         }
         
     }
+    
+//    for(int i=0;i<C;i++){
+//        for(int j=0;j<H;j++){
+//            for(int k=0;k<W;k++){
+//                cout << xbuf[i][j][k] << ' ';
+//            }
+//        }
+//
+//    }
+//    cout <<'\n';
+//    for(int i=0;i<F;i++){
+//        for(int j=0;j<C;j++){
+//            for(int k=0;k<FH;k++){
+//                for(int l=0;l<FW;l++){
+//                    wbuf[i][j][k][l] = w[i*C*FH*FW+j*FH*FW+k*FW+l];
+//                }
+//            }
+//        }
+//    }
+
+
 
     for(int i=0;i<F;i++){
         for(int j=0;j<C;j++){
@@ -84,6 +108,16 @@ void forward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<f
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    
+    for(int i=0;i<F;i++){
+        for(int j=0;j<outH;j++){
+            for(int k=0;k<outW;k++){
+                y[i*outH*outW+j*outW+k]= ybuf[i][j][k];
+                
             }
         }
     }
@@ -328,10 +362,9 @@ void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int d
 
 }
 
-float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,int N){
+float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,long int N){
     
     float log_probs[x.size()];
-//    float ybuf[x.size()];
     float probs[x.size()];
 
     float loss =0;
@@ -372,7 +405,7 @@ float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,int N){
     }
     
 
-    loss=loss/x.size();
+    
 
     return loss;
 }  

@@ -20,9 +20,9 @@ void backward_fcc(vector<float> &x, vector<float> &w, vector<float> &dx, vector<
 
 void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<float> &dx,vector<float> &dw,vector<float> &db, vector<float> &dy , int F, int C, int H, int W, int FH, int FW);
 
-void forward_relu(vector<float> x, vector<float> y, int dim);
+void forward_relu(vector<float> &x, vector<float> &y, int dim);
 
 void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int dim);
 
-float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,int N);
+float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,long int N);
 #endif /* layers_h */
