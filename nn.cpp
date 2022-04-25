@@ -150,6 +150,32 @@ public:
         }
     }
 
+    float find_accuracy(vector<vector<float> > &x, vector<int> &y){
+
+        int correct=0;
+
+        for(int iter=0;iter<x.size();iter++){
+            fwprop(x[iter]);
+            float max=activations[nlayers-1][0];
+            int maxitem=0;
+
+            for(int i=1;i<activations[nlayers-1].size();i++){
+                if (activations[nlayers-1][i] > max){
+                    max=activations[nlayers-1][i];
+                    maxitem=i;
+                }
+            }
+
+            if (maxitem == y[iter]){
+                correct +=1;
+
+            }
+        }
+
+        float accuracy= (float)correct/(float)x.size();
+        return accuracy;
+    }
+
     void train(vector<vector<float> > &x, vector<int> &y, float lr){
         
 
@@ -192,16 +218,17 @@ public:
 //                }
                 ////-------------------------------------------------------------------------------------------------------------
                 backprop();
-    //            if((i % 100) ==0){
-    //                update_weights(lr);
-    //                cout << "current loss =" << loss/i<<'\n';
-    //            }
+               if((i % 64) ==0){
+                   update_weights(lr);
+                //    cout << "current loss =" << loss/i<<'\n';
+               }
     //            cout << "current loss = "<<curr_loss<<'\n';
             }
             loss=loss/N;
-            update_weights(0.1);
+            
+            float accuracy=find_accuracy(x,y);
 
-            cout<<"epoch:"<<epoch<<" , "<< "loss: "<<loss<<'\n';
+            cout<<"epoch:"<<epoch<<" , "<< "loss: "<<loss << " accuracy:" << accuracy << '\n';
         }
 
     }

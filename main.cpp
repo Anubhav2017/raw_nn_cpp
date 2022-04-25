@@ -25,7 +25,7 @@ int main(){
 //    }
     cout<<'\n';
     
-    nn.train(x_train,y_train,0.1);
+    nn.train(x_train,y_train,0.6);
 
 
 }
