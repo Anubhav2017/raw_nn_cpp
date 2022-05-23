@@ -14,7 +14,9 @@ int main(){
     
     cout<<x_train.size()<<'\n';
     for(int i=0;i<784;i++){
-        cout<<x_train[0][i]<<'\n';
+        if(x_train[0][i] > 0){
+            cout<<x_train[0][i]<<' ';
+        }
     }
     
     // Neural_Network nn;

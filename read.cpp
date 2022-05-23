@@ -10,10 +10,11 @@ size_t split_float(const std::string &txt, std::vector<float> &strs, char ch)
 
     // Decompose statement
     while( pos != std::string::npos ) {
-        const char* s=txt.substr( initialPos, pos - initialPos ).c_str();
-//        cout<<s<<'\n';
+        const char* s=txt.substr( initialPos, pos - initialPos );
+       cout<<s<<'\n';
         float x;
-        sscanf(s,"%f",&x); 
+        sscanf(s,"%f",&x);
+        // cout << x << '\n'; 
         strs.push_back(x);
         initialPos = pos + 1;
 
@@ -65,7 +66,7 @@ void read_input(vector< vector<float> > &x_train, vector<int> &y_train){
 //          cout<<tp<<'\n';
           x_train.push_back(vector<float>(0));
 //          if (iter ==1)
-//          cout<<tp<<'\n';
+        //  cout<<tp<<'\n';
          split_float(tp, x_train[iter],' ');
 //          if (iter == 1){
 //              for(int k=0;k<x_train[iter].size();k++){
