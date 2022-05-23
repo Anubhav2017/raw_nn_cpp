@@ -13,19 +13,22 @@ int main(){
     read_input(x_train, y_train);
     
     cout<<x_train.size()<<'\n';
+    for(int i=0;i<784;i++){
+        cout<<x_train[0][i]<<'\n';
+    }
     
-    Neural_Network nn;
+    // Neural_Network nn;
     
-    nn.add_conv(3,1,1,784,1,3);
-    nn.add_relu(2346);
-    nn.add_fcc(2346,10);
+    // nn.add_conv(4,1,28,28,1,3);
+    // nn.add_relu(2346);
+    // nn.add_fcc(2346,10);
     
 //    for (int i=0;i<784;i++){
 //        cout<< x_train[1][i];
 //    }
-    cout<<'\n';
+    // cout<<'\n';
     
-    nn.train(x_train,y_train,0.6);
+    // nn.train(x_train,y_train,0.6);
 
 
 }

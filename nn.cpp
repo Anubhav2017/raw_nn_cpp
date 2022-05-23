@@ -44,7 +44,7 @@ public:
         shapes.push_back(vector<int>(2));
         shapes[nlayers - 1][0] = xdim;
         shapes[nlayers - 1][1] = ydim;
-    }
+    } 
 
     void add_conv(int F, int C, int H, int W, int FH, int FW) {
         layers.push_back("conv");
