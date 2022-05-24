@@ -10,7 +10,7 @@ class Neural_Network {
 public:
 
     vector<string> layers;
-    int nlayers=0;
+    int nlayers;
 
     vector<vector<float> > weights;
     vector<vector<float> > grads_weights;
@@ -21,8 +21,15 @@ public:
     vector<vector<float> > activations;
     vector<vector<float> > grads_activations;
 
+    
+
     vector<vector<int> > shapes;
     
+    Neural_Network(int xdim){
+        activations.push_back(vector<float>(xdim));
+        grads_activations.push_back(vector<float>(xdim));
+        nlayers=0;
+    }
 
     void add_fcc(int xdim, int ydim) {
 
@@ -56,12 +63,17 @@ public:
         weights.push_back(weight_vec);
         grads_weights.push_back(vector<float>(F * C * FH * FW));
 
-        biases.push_back(vector<float>(F));
+        vector<float> bias_vec(F);
+        fill(bias_vec.begin(),bias_vec.end(),0.01);
+        biases.push_back(bias_vec);
+
         grads_bias.push_back(vector<float>(F));
 
-        activations.push_back(vector<float>(F * (F-FH+1) * (W-FW+1)));
-        grads_activations.push_back(vector<float>(F * (F-FH+1) * (W-FW+1)));
-
+        activations.push_back(vector<float>(F * (H-FH+1) * (W-FW+1)));
+        grads_activations.push_back(vector<float>(F * (H-FH+1) * (W-FW+1)));
+        // cout << (F * (F-FH+1) * (W-FW+1))<< '\n';
+        // cout << "F=" << F<< " F-FH+1="<< F-FH+1 << " W-FW+1="<< W-FW+1 << '\n'; 
+        // cout << activations[nlayers - 1].size() << '\n';
         shapes.push_back(vector<int>(6));
         shapes[nlayers - 1][0] = F;
         shapes[nlayers - 1][1] = C;
@@ -91,49 +103,87 @@ public:
 
     void fwprop(vector<float> &x){
 
-        if (layers[0] == "fcc") {
-            forward_fcc(x, weights[0], activations[0], biases[0], shapes[0][0], shapes[0][1]);
+        for(int i=0;i<x.size();i++){
+            activations[0][i] = x[i];
         }
-        else if (layers[0] == "conv") {
+
+        // if (layers[0] == "fcc") {
+        //     forward_fcc(activations[0], weights[0], activations[1], biases[0], shapes[0][0], shapes[0][1]);
+        // }
+        // else if (layers[0] == "conv") {
             
-            forward_conv(x, weights[0], activations[0], biases[0], shapes[0][0], shapes[0][1], shapes[0][2], shapes[0][3], shapes[0][4], shapes[0][5]);
-        }
+        //     forward_conv(activations[0], weights[0], activations[1], biases[0], shapes[0][0], shapes[0][1], shapes[0][2], shapes[0][3], shapes[0][4], shapes[0][5]);
+        // }
         
 //        for(int i=0;i<weights[0].size();i++){
 //            cout << weights[0][i]<<' ';
 //        }
 //        cout <<'\n';
-      
 
-
-
-        for(int i=1;i<nlayers;i++){
+        for(int i=0;i<nlayers;i++){
             if(layers[i]=="fcc"){
-                forward_fcc(activations[i-1], weights[i], activations[i], biases[i], shapes[i][0], shapes[i][1]);
+                forward_fcc(activations[i], weights[i], activations[i+1], biases[i], shapes[i][0], shapes[i][1]);
             }
             else if(layers[i]=="conv"){
-                forward_conv(activations[i-1], weights[i], activations[i], biases[i], shapes[i][0], shapes[i][1], shapes[i][2], shapes[i][3], shapes[i][4], shapes[i][5]);
+                // cout << "yof"<< '\n';
+                forward_conv(activations[i], weights[i], activations[i+1], biases[i], shapes[i][0], shapes[i][1], shapes[i][2], shapes[i][3], shapes[i][4], shapes[i][5]);
             }
             else if(layers[i]=="relu"){
-                forward_relu(activations[i-1], activations[i], shapes[i][0]);
+                forward_relu(activations[i], activations[i+1], shapes[i][0]);
             }
         }
     }
+
+    // void set_gradient(int i,vector<float> y){
+    //     for(int j=0;j<y.size();j++){
+    //         grads_activations[i][j] = y[j];
+    //     }
+    // }
+
 
     void backprop(){
+        cout << layers[0]<< '\n';
             
-        for(int i=nlayers-1;i>0;i--){
-            if(layers[i]=="fcc"){
-                backward_fcc(activations[i-1], weights[i], grads_activations[i-1], grads_activations[i], grads_weights[i],grads_bias[i], shapes[i][0], shapes[i][1]);
+        for(int i=nlayers-1;i>=0;i--){
+            // cout << i<< '\n';
+            if(layers[i] == "fcc"){
+
+                backward_fcc(activations[i], weights[i], grads_activations[i], grads_activations[i+1], grads_weights[i],grads_bias[i], shapes[i][0], shapes[i][1]);
             }
-            else if(layers[i]=="conv"){
-                backward_conv(activations[i-1], weights[i],activations[i], grads_activations[i-1], grads_weights[i], grads_bias[i],grads_activations[i],  shapes[i][0],shapes[i][1], shapes[i][2], shapes[i][3], shapes[i][4], shapes[i][5]);
+            else if(layers[i] == ("conv")){
+                backward_conv(activations[i], weights[i],activations[i+1], grads_activations[i], grads_weights[i], grads_bias[i],grads_activations[i+1],  shapes[i][0],shapes[i][1], shapes[i][2], shapes[i][3], shapes[i][4], shapes[i][5]);
             }
             else if(layers[i]=="relu"){
-                backward_relu(activations[i-1], grads_activations[i-1], grads_activations[i], shapes[i][0]);
+                backward_relu(activations[i], grads_activations[i], grads_activations[i+1], shapes[i][0]);
             }
         }
     }
+
+    void get_activations(int i){
+        cout << "activations["<<i<<"] size = "<<activations[i].size()<<'\n';
+        for(int j=0;j<activations[i].size();j++){
+            cout << activations[i][j]<<' ';
+        }
+        cout <<'\n';
+    }
+
+    void set_grads_activations(int i, vector<float> g){
+        // cout << g.size()<<'\n';
+
+        for(int j=0;j<g.size();j++){
+            grads_activations[i][j] = g[j];
+            // cout << grads_activations[i][j]<<' ';
+        }
+        // grads_activations[i] = g;
+    }
+
+    void get_weights(int i){
+        for(int j=0;j<weights[i].size();j++){
+            cout << weights[i][j]<<' ';
+        }
+        cout <<'\n';
+    }
+    
     
     void update_weights(float lr){
         for(int i=0;i< nlayers;i++){
@@ -181,12 +231,13 @@ public:
 
         long int N=x.size();
                 
-        for(int epoch=0;epoch < 100;epoch++){
+        for(int epoch=0;epoch < 1;epoch++){
             float loss=0;
 
             for (int i = 0; i < x.size(); i++) {
                 fwprop(x[i]);
-                loss+=cross_entropy_derivative(activations[nlayers-1],grads_activations[nlayers-1],y[i],N);
+
+                mse_derivative(activations[nlayers-1],grads_activations[nlayers-1],grads_activations[nlayers]);
                 ///----------------------------------------------------------------------------------------------------------------
 //                if( i==10){
 //                    for(int l=0;l<nlayers;l++){
@@ -218,17 +269,18 @@ public:
 //                }
                 ////-------------------------------------------------------------------------------------------------------------
                 backprop();
-               if((i % 64) ==0){
-                   update_weights(lr);
-                //    cout << "current loss =" << loss/i<<'\n';
-               }
+                update_weights(lr);
+            //    if((i % 64) ==0){
+            //        update_weights(lr);
+            //     //    cout << "current loss =" << loss/i<<'\n';
+            //    }
     //            cout << "current loss = "<<curr_loss<<'\n';
             }
-            loss=loss/N;
+            // loss=loss/N;
             
-            float accuracy=find_accuracy(x,y);
+            // float accuracy=find_accuracy(x,y);
 
-            cout<<"epoch:"<<epoch<<" , "<< "loss: "<<loss << " accuracy:" << accuracy << '\n';
+            // cout<<"epoch:"<<epoch<<" , "<< "loss: "<<loss << " accuracy:" << accuracy << '\n';
         }
 
     }

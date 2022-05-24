@@ -202,10 +202,16 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
     float xbuf[C][H][W];
     float wbuf[F][C][FH][FW];
 
+    
+
+    // for(int i=0;i<dy.size();i++){
+    //     cout << dy[i] << ' ';
+    // }
     for(int i=0;i<C;i++){
         for(int j=0;j<H;j++){
             for(int k=0;k<W;k++){
                 xbuf[i][j][k] = x[i*H*W+j*W+k];
+                // cout << xbuf[i][j][k] << ' ';
             }
         }
         
@@ -235,6 +241,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         for(int j=0;j<outH;j++){
             for(int k=0;k<outW;k++){
                 dybuf[i][j][k] = dy[i*outH*outW+j*outW+k];
+                // cout <<  dybuf[i][j][k]<< '\n';
             }
         }
     }
@@ -260,7 +267,8 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
     for(int i=0;i<C;i++){
         for(int j=0;j<H;j++){
             for(int k=0;k<W;k++){
-                dxbuf[i][j][k] = dx[i*H*W+j*W+k];
+                // dxbuf[i][j][k] = dx[i*H*W+j*W+k];
+                dxbuf[i][j][k] = 0;
             }
         }
         
@@ -270,6 +278,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         db[i] = dbbuf[i];
     }
 
+    
     // compute gradients
 
     for(int f=0;f<F;f++){  
@@ -279,7 +288,10 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
                     for(int fh=0;fh<FH;fh++){
                         for(int fw=0;fw<FW;fw++){
                             dwbuf[f][c][fh][fw] += dybuf[f][h][w]*xbuf[c][h+fh][w+fw];
-                            dxbuf[c][h+fh][w+fw] += dybuf[f][h][w]*wbuf[f][c][h+fh][w+fw];
+                            dxbuf[c][h+fh][w+fw] += dybuf[f][h][w]*wbuf[f][c][fh][fw];
+                            cout << "dy= "<<dybuf[f][h][w] << '\n';
+                            cout << "w=" << wbuf[f][c][h+fh][w+fw]<< '\n';
+                            // cout << "x= "<<xbuf[c][h+fh][w+fw] << '\n';
                         }
                     }
                 }
@@ -304,6 +316,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
         for(int j=0;j<H;j++){
             for(int k=0;k<W;k++){
                 dx[i*H*W+j*W+k] = dxbuf[i][j][k];
+                // cout << dxbuf[i][j][k] << " ";
             }
         }
         
@@ -360,6 +373,18 @@ void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int d
         dx[i] = dxbuf[i];
     }
 
+}
+
+void mse_derivative(vector<float> &x,vector<float> &dx, vector<float> &y ){
+    float loss=0;
+    for(int i=0;i< x.size();i++){
+        dx[i] = 2*(x[i]- y[i])/x.size();
+        // loss += (y[i] - x[i])*(y[i] - x[i]);
+    }
+    // loss = loss/x.size();
+    // cout << "loss = " << loss << '\n';
+
+    
 }
 
 float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,long int N){
