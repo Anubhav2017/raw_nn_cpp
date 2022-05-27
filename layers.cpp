@@ -289,8 +289,7 @@ void backward_conv(vector<float> &x, vector<float> &w, vector<float> &y, vector<
                         for(int fw=0;fw<FW;fw++){
                             dwbuf[f][c][fh][fw] += dybuf[f][h][w]*xbuf[c][h+fh][w+fw];
                             dxbuf[c][h+fh][w+fw] += dybuf[f][h][w]*wbuf[f][c][fh][fw];
-                            cout << "dy= "<<dybuf[f][h][w] << '\n';
-                            cout << "w=" << wbuf[f][c][h+fh][w+fw]<< '\n';
+                            
                             // cout << "x= "<<xbuf[c][h+fh][w+fw] << '\n';
                         }
                     }
@@ -387,7 +386,7 @@ void mse_derivative(vector<float> &x,vector<float> &dx, vector<float> &y ){
     
 }
 
-float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,long int N){
+float cross_entropy_derivative(vector<float> &x,vector<float> &dx, int y,long int N){
     
     float log_probs[x.size()];
     float probs[x.size()];

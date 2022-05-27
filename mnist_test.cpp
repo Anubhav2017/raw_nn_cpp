@@ -1,6 +1,6 @@
 #include <vector>
 #include "read.h"
-
+#include "nn.cpp"
 using namespace std;
 
 int main(){
@@ -11,30 +11,16 @@ int main(){
 
     read_input(x_train, y_train);
     
-    cout<<x_train.size()<<'\n';
-    for(int i=0;i<784;i++){
-        if(x_train[0][i] > 0){
-            cout<<x_train[0][i]<<' ';
-        }
-    }
-    cout << y_train.size()<< '\n';
-
-    for(int i=0;i<y_train.size();i++){
-        cout<<y_train[i]<<' ';
-    }
     
-    // Neural_Network nn;
+    Neural_Network nn(784);
     
-    // nn.add_conv(4,1,28,28,1,3);
-    // nn.add_relu(2346);
-    // nn.add_fcc(2346,10);
+    nn.add_conv(5,1,28,28,5,5);
+    nn.add_relu(2880);
+    nn.add_fcc(2880,10);
     
-//    for (int i=0;i<784;i++){
-//        cout<< x_train[1][i];
-//    }
     // cout<<'\n';
     
-    // nn.train(x_train,y_train,0.6);
+    nn.train(x_train,y_train,0.005,32,10);
 
 
 }

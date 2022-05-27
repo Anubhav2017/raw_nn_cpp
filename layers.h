@@ -24,7 +24,7 @@ void forward_relu(vector<float> &x, vector<float> &y, int dim);
 
 void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int dim);
 
-float cross_entropy_derivative(vector<float> x,vector<float> &dx, int y,long int N);
+float cross_entropy_derivative(vector<float> &x,vector<float> &dx, int y,long int N);
 
 void mse_derivative(vector<float> &x,vector<float> &dx, vector<float> &y);
 #endif /* layers_h */

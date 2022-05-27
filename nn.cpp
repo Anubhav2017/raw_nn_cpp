@@ -142,7 +142,7 @@ public:
 
 
     void backprop(){
-        cout << layers[0]<< '\n';
+        // cout << layers[0]<< '\n';
             
         for(int i=nlayers-1;i>=0;i--){
             // cout << i<< '\n';
@@ -226,18 +226,31 @@ public:
         return accuracy;
     }
 
-    void train(vector<vector<float> > &x, vector<int> &y, float lr){
+    void train(vector<vector<float> > &x, vector<int> &y, float lr, int batch_size, int epochs){
         
 
-        long int N=x.size();
+        // long int N=x.size();
                 
-        for(int epoch=0;epoch < 1;epoch++){
+        for(int epoch=0;epoch < epochs;epoch++){
             float loss=0;
+            int iter=0;
+
 
             for (int i = 0; i < x.size(); i++) {
                 fwprop(x[i]);
+                loss+=cross_entropy_derivative(activations[nlayers],grads_activations[nlayers],y[i],batch_size);
+                backprop();
+                if(iter%batch_size==0){
+                    update_weights(lr);
+                    loss=loss/batch_size;
+                    cout << "loss = "<<loss<<'\n';
+                    loss=0;
 
-                mse_derivative(activations[nlayers-1],grads_activations[nlayers-1],grads_activations[nlayers]);
+                }
+                iter++;
+
+
+                // mse_derivative(activations[nlayers-1],grads_activations[nlayers-1],grads_activations[nlayers]);
                 ///----------------------------------------------------------------------------------------------------------------
 //                if( i==10){
 //                    for(int l=0;l<nlayers;l++){
@@ -268,8 +281,8 @@ public:
 //
 //                }
                 ////-------------------------------------------------------------------------------------------------------------
-                backprop();
-                update_weights(lr);
+                // backprop();
+                // update_weights(lr);
             //    if((i % 64) ==0){
             //        update_weights(lr);
             //     //    cout << "current loss =" << loss/i<<'\n';
