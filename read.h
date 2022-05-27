@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+
 using namespace std;
 
 //size_t split_float(const std::string &txt, std::vector<float> strs, char ch);
