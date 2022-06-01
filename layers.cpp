@@ -27,8 +27,11 @@ void forward_fcc(vector<float> &x, vector<float> &w, vector<float> &y, vector<fl
 
     for(int i=0;i<ydim;i++){
         ybuf[i] = bbuf[i];
+        // cout<< "bbuf["<<i<<"] = "<<bbuf[i]<<endl;
         for(int j=0;j<xdim;j++){
             ybuf[i] += xbuf[j]*wbuf[i][j];
+
+            // cout << "xbuf["<<j<<"] = "<<xbuf[j]<<" wbuf["<<i<<"]["<<j<<"] = "<<wbuf[i][j]<<" ybuf["<<i<<"] = "<<ybuf[i]<<endl;
         }
     }
 
@@ -136,6 +139,7 @@ void backward_fcc(vector<float> &x, vector<float> &w, vector<float> &dx, vector<
 
     for(int i=0;i<xdim;i++){
         xbuf[i] = x[i];
+        dxbuf[i] = 0;
     }
 
 
@@ -158,11 +162,12 @@ void backward_fcc(vector<float> &x, vector<float> &w, vector<float> &dx, vector<
     for(int i=0;i<ydim;i++){
         dybuf[i] = dy[i];
     }
-    
+    // cout << "inside backward_fcc" << endl;
     for(int i=0;i<ydim;i++){
         for(int j=0;j<xdim;j++){
-            dxbuf[j] = dybuf[i] * wbuf[i][j];
+            dxbuf[j] += dybuf[i] * wbuf[i][j];
             dwbuf[i][j] += dybuf[i]*xbuf[j];
+            // cout << "dy=" << dybuf[i]<< ' ' << "xbuf=" << xbuf[j]<< ' ';
         }
         
     }
@@ -374,19 +379,19 @@ void backward_relu(vector<float> &x, vector<float> &dx, vector<float> &dy, int d
 
 }
 
-void mse_derivative(vector<float> &x,vector<float> &dx, vector<float> &y ){
+float mse_derivative(vector<float> &x,vector<float> &dx, vector<float> y ){
     float loss=0;
     for(int i=0;i< x.size();i++){
         dx[i] = 2*(x[i]- y[i])/x.size();
-        // loss += (y[i] - x[i])*(y[i] - x[i]);
+        loss += (y[i] - x[i])*(y[i] - x[i]);
     }
-    // loss = loss/x.size();
-    // cout << "loss = " << loss << '\n';
+    loss = loss/x.size();
+    return loss;
 
     
 }
 
-float cross_entropy_derivative(vector<float> &x,vector<float> &dx, int y,long int N){
+float cross_entropy_derivative(vector<float> &x,vector<float> &dx, int y,int N){
     
     float log_probs[x.size()];
     float probs[x.size()];
@@ -415,9 +420,13 @@ float cross_entropy_derivative(vector<float> &x,vector<float> &dx, int y,long in
         probs[i] = exp(log_probs[i])/sum;
     }
 
-    loss -= log(probs[y]);
+    // for(int i=0;i<x.size();i++){
+    //     cout << probs[i] << " ";
+    // }
+    // // cout << x.size() << '\n';
+    // cout << y << '\n';
 
-    
+    loss -= log(probs[y]);
 
     for(int i=0;i<x.size();i++){
         if(i == y){

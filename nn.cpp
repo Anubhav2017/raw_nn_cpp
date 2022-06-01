@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 
+#include <chrono>
+using namespace std::chrono;
+
 using namespace std;
 
 class Neural_Network {
@@ -191,10 +194,12 @@ public:
             for(int j=0;j<weights[i].size();j++){
                 
                 weights[i][j] -= grads_weights[i][j]*lr;
+                grads_weights[i][j] = 0;
             }
             
             for (int j=0;j<biases[i].size();j++){
                 biases[i][j] -= grads_bias[i][j]*lr;
+                grads_bias[i][j] = 0;
             }
             
         }
@@ -209,9 +214,9 @@ public:
             float max=activations[nlayers-1][0];
             int maxitem=0;
 
-            for(int i=1;i<activations[nlayers-1].size();i++){
-                if (activations[nlayers-1][i] > max){
-                    max=activations[nlayers-1][i];
+            for(int i=1;i<activations[nlayers].size();i++){
+                if (activations[nlayers][i] > max){
+                    max=activations[nlayers][i];
                     maxitem=i;
                 }
             }
@@ -226,7 +231,13 @@ public:
         return accuracy;
     }
 
-    void train(vector<vector<float> > &x, vector<int> &y, float lr, int batch_size, int epochs){
+    void increment_classes(int new_classes){
+        int prev_size = activations[nlayers].size();
+        int new_size = new_classes+prev_size;
+    }
+
+
+    void train_mse(vector<vector<float> > &x, vector<vector<float> > &y, float lr, int batch_size, int epochs){
         
 
         // long int N=x.size();
@@ -237,63 +248,105 @@ public:
 
 
             for (int i = 0; i < x.size(); i++) {
+
+                cout << "---------------------------------------"<<endl;
                 fwprop(x[i]);
-                loss+=cross_entropy_derivative(activations[nlayers],grads_activations[nlayers],y[i],batch_size);
+                
+                 
+                //    for(int l=0;l<=nlayers;l++){
+                //        cout<< "layer "<<l<<" activations= ";
+                //        for(int k=0;k<activations[l].size();k++){
+                //            cout<< activations[l][k]<<' ';
+                //        }
+                //            cout<< '\n';
+
+                //    }
+
+                //    cout<< '\n';
+
+               
+               
+                   
+               
+                loss += mse_derivative(activations[nlayers],grads_activations[nlayers],y[i]);
+
+                // for(int j=0;j<activations[nlayers].size();j++){
+                //     cout << "label " << " "<<  y[i][j]<<' ';
+                // }
+                // cout << endl;
+                // cout << "prediction grads"<< endl;
+                // for(int i=0;i<activations[nlayers].size();i++){
+                //     cout << grads_activations[nlayers][i]<<' ';
+                // }
+                // cout << endl;
                 backprop();
+                
+                
                 if(iter%batch_size==0){
                     update_weights(lr);
                     loss=loss/batch_size;
                     cout << "loss = "<<loss<<'\n';
+
+                    
+                    // for(int k=0;k<3;k++){
+                    //     cout << grads_activations[nlayers][k]<<' ' ; 
+                    // }
+                    // cout << endl;
+                    // cout << y[i]<<endl;
                     loss=0;
 
                 }
                 iter++;
 
-
-                // mse_derivative(activations[nlayers-1],grads_activations[nlayers-1],grads_activations[nlayers]);
-                ///----------------------------------------------------------------------------------------------------------------
-//                if( i==10){
-//                    for(int l=0;l<nlayers;l++){
-//                        cout<< "layer "<<l<<" activations= ";
-//                        for(int k=0;k<activations[l].size();k++){
-//                            cout<< activations[l][k]<<' ';
-//                        }
-//                            cout<< '\n';
-//
-//                    }
-//
-//                    cout<< '\n';
-//
-//                }
-//                if( i==10){
-//                    for(int l=0;l<nlayers;l++){
-//                        cout<< "layer "<<l<<" weights= ";
-//                        for(int k=0;k<weights[l].size();k++){
-//                            cout<< weights[l][k]<<' ';
-//                        }
-//                            cout<< '\n';
-//
-//                    }
-//                for(int k=0;k<10;k++){
-//                    cout<<activations[nlayers-2][i]<<' ';
-//                }
-//                    cout<< '\n';
-//
-//                }
-                ////-------------------------------------------------------------------------------------------------------------
-                // backprop();
-                // update_weights(lr);
-            //    if((i % 64) ==0){
-            //        update_weights(lr);
-            //     //    cout << "current loss =" << loss/i<<'\n';
-            //    }
-    //            cout << "current loss = "<<curr_loss<<'\n';
             }
-            // loss=loss/N;
-            
-            // float accuracy=find_accuracy(x,y);
+ 
+        }
 
-            // cout<<"epoch:"<<epoch<<" , "<< "loss: "<<loss << " accuracy:" << accuracy << '\n';
+    }
+
+    void train_cel(vector<vector<float> > &x, vector<int> &y, float lr, int batch_size, int epochs){
+        
+
+        // long int N=x.size();
+                
+        for(int epoch=0;epoch < epochs;epoch++){
+            float loss=0;
+            int iter=0;
+
+            for (int i = 0; i < 2; i++) {
+                auto t0 = high_resolution_clock::now();
+
+                fwprop(x[i]);
+                auto t1 = high_resolution_clock::now();
+                loss+=cross_entropy_derivative(activations[nlayers],grads_activations[nlayers],y[i],batch_size);
+                auto t2 = high_resolution_clock::now();
+                backprop();
+                auto t3 = high_resolution_clock::now();
+         
+                
+                if(iter%batch_size==0){
+                    auto t4 = high_resolution_clock::now();
+                    update_weights(lr);
+                    auto t5 = high_resolution_clock::now();
+                    loss=loss/batch_size;
+                    cout <<loss<< ", ";
+                    cout << "accuracy=" << find_accuracy(x,y)<<'\n'; 
+                    loss=0;
+
+                    cout << "fwprop time = " << duration_cast<microseconds>(t1-t0).count() << "us" << endl;
+                cout << "backprop time = " << duration_cast<microseconds>(t3-t2).count() << "us" << endl;
+                cout << "update time = " << duration_cast<microseconds>(t5-t4).count() << "us" << endl;
+                cout << "loss time = " << duration_cast<microseconds>(t2-t1).count() << "us" << endl;
+
+                }
+                iter++;
+
+             
+
+
+
+            }
+
         }
 
     }

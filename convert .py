@@ -3,7 +3,7 @@ import numpy as np
 
 class Converter():
 
-    def encode(self, input_data, signed=True, total_bits=16, fractional_bits=7):
+    def encode(self, input_data, signed=True, total_bits=16, fractional_bits=13):
         '''
 
         Converts input data from float/int python data types to ap_fixed with total bits and fractional_bits and returns its uint32 equivalent
@@ -22,7 +22,7 @@ class Converter():
 
 
 
-    def decode(self, input_data, total_bits=16, fractional_bits=7):
+    def decode(self, input_data, total_bits=16, fractional_bits=13):
         '''
         Converts input data from uint32 format to float with total_bits and fractional_bits resolution
 
